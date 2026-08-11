@@ -13,8 +13,9 @@ dotenv.config();
 // initalize data
 const databasee = initializeDB("./expense.db");
 const tool = databaseFunction(databasee);
+const tools = [tool.addexpensive, tool.getExpense, tool.generateChart];
 //========================================================
-const toolNode = new ToolNode([tool?.addexpensive, tool.getExpense]);
+const toolNode = new ToolNode(tools);
 //========================================================
 const llm = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY,
@@ -23,7 +24,11 @@ const llm = new ChatGroq({
 });
 //----------------------------------LLM NODE ---------------------
 async function LLMnode(state: typeof MessagesAnnotation.State) {
-  const llmwithTool = llm.bindTools([tool.addexpensive, tool.getExpense]);
+  const llmwithTool = llm.bindTools([
+    tool.addexpensive,
+    tool.getExpense,
+    tool.generateChart,
+  ]);
   const llminvoke = await llmwithTool.invoke([
     llmSystemPrompt,
     ...state.messages,
@@ -40,15 +45,11 @@ async function condition1(state: typeof MessagesAnnotation.State) {
   }
   return "__end__";
 }
-async function condition2(state:typeof MessagesAnnotation.State) {
-  if()
-}
 const graph = new StateGraph(MessagesAnnotation)
   .addNode("llmNode", LLMnode)
   .addNode("toolNode", toolNode)
   .addEdge("__start__", "llmNode")
-  .addConditionalEdges("toolNode",condition2)
-  // .addEdge("toolNode", "llmNode")
+  .addEdge("toolNode", "llmNode")
   .addConditionalEdges("llmNode", condition1);
 const agent = graph.compile({ checkpointer: new MemorySaver() });
 async function main() {
@@ -74,7 +75,7 @@ async function main() {
     );
     console.log(`Ai reply :`);
     console.log(finalINoke.messages.at(-1)?.content);
-    console.log(finalINoke);
+    // console.log(finalINoke);
   }
   rl.close();
 }
