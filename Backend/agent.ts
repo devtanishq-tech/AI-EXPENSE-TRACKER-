@@ -6,7 +6,7 @@ import { databaseFunction } from "./tools.ts";
 import dotenv from "dotenv";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { llmSystemPrompt } from "./prompt.ts";
-import type { AIMessage } from "@langchain/core/messages";
+import type { AIMessage, ToolMessage } from "@langchain/core/messages";
 import readline from "readline/promises";
 import { waitForDebugger } from "inspector";
 dotenv.config();
@@ -45,11 +45,20 @@ async function condition1(state: typeof MessagesAnnotation.State) {
   }
   return "__end__";
 }
+async function condition2(state: typeof MessagesAnnotation.State) {
+  const lastmessage = state.messages.at(-1) as ToolMessage;
+  const messagess = JSON.parse(lastmessage.content as string);
+
+  if (messagess.type === "chart") {
+    return "__end__";
+  }
+  return "llmNode";
+}
 const graph = new StateGraph(MessagesAnnotation)
   .addNode("llmNode", LLMnode)
   .addNode("toolNode", toolNode)
   .addEdge("__start__", "llmNode")
-  .addEdge("toolNode", "llmNode")
+  .addConditionalEdges("toolNode", condition2)
   .addConditionalEdges("llmNode", condition1);
 const agent = graph.compile({ checkpointer: new MemorySaver() });
 async function main() {
@@ -75,7 +84,7 @@ async function main() {
     );
     console.log(`Ai reply :`);
     console.log(finalINoke.messages.at(-1)?.content);
-    // console.log(finalINoke);
+    console.log(finalINoke);
   }
   rl.close();
 }

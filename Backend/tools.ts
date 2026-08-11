@@ -80,7 +80,6 @@ export function databaseFunction(Database: Database) {
           throw new Error("Invalid groupby. Use month, week, or day.");
       }
       const date = new Date().toISOString().split("T")[0];
-      console.log(date);
       const query = Database.prepare(
         `SELECT
           strftime('${dateFormat}', date) AS period,
@@ -92,9 +91,22 @@ export function databaseFunction(Database: Database) {
       );
       const rows = query.all(from, to);
       console.log(`--------------------------------`);
+      console.log(`Row is printed below `);
+      type rowtype = {
+        period: string;
+      };
       console.log(JSON.stringify(rows));
+      // const row1 = (rows[0] as rowtype).period;
+      // console.log(row1);
+      const result = rows.map((current) => {
+        return {
+          [groupby]: current.period,
+          amount: current.total,
+        };
+      });
       console.log(`0--------------------------------`);
-      return JSON.stringify({ status: success, rows });
+
+      return JSON.stringify({ type: `chart`, data: result, labelKey: groupby });
     },
     {
       name: "generateChart",
