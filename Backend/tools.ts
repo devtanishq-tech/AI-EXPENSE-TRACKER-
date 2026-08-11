@@ -92,9 +92,7 @@ export function databaseFunction(Database: Database) {
       const rows = query.all(from, to);
       console.log(`--------------------------------`);
       console.log(`Row is printed below `);
-      type rowtype = {
-        period: string;
-      };
+
       console.log(JSON.stringify(rows));
       // const row1 = (rows[0] as rowtype).period;
       // console.log(row1);

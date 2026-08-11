@@ -69,7 +69,7 @@ async function main() {
   while (true) {
     const question = await rl.question("ASK :");
     if (question === "bye") break;
-    const finalINoke = await agent.invoke(
+    const finalINoke = await agent.stream(
       {
         messages: [
           {
@@ -79,12 +79,19 @@ async function main() {
         ],
       },
       {
+        streamMode: ["messages", "custom"],
         configurable: { thread_id: "1-1-" },
       },
     );
-    console.log(`Ai reply :`);
-    console.log(finalINoke.messages.at(-1)?.content);
-    console.log(finalINoke);
+    //============
+    for await (const chunk of finalINoke) {
+      console.log(`Each Node response :`, chunk);
+    }
+
+    //==========
+    // console.log(`Ai reply :`);
+    // console.log(finalINoke.messages.at(-1)?.content);
+    // console.log(finalINoke);
   }
   rl.close();
 }
