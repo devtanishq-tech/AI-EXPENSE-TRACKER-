@@ -9,9 +9,11 @@ import { llmSystemPrompt } from "./prompt.ts";
 import type { AIMessage, ToolMessage } from "@langchain/core/messages";
 import readline from "readline/promises";
 import { waitForDebugger } from "inspector";
+import { ChildProcess } from "child_process";
 dotenv.config();
+console.log(process.env.GROQ_API_KEY);
 // initalize data
-const databasee = initializeDB("./expense.db");
+const databasee = initializeDB("../expense.db");
 const tool = databaseFunction(databasee);
 const tools = [tool.addexpensive, tool.getExpense, tool.generateChart];
 //========================================================
@@ -60,39 +62,5 @@ const graph = new StateGraph(MessagesAnnotation)
   .addEdge("__start__", "llmNode")
   .addConditionalEdges("toolNode", condition2)
   .addConditionalEdges("llmNode", condition1);
-const agent = graph.compile({ checkpointer: new MemorySaver() });
-async function main() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  while (true) {
-    const question = await rl.question("ASK :");
-    if (question === "bye") break;
-    const finalINoke = await agent.stream(
-      {
-        messages: [
-          {
-            role: "human",
-            content: question,
-          },
-        ],
-      },
-      {
-        streamMode: ["messages", "custom"],
-        configurable: { thread_id: "1-1-" },
-      },
-    );
-    //============
-    for await (const chunk of finalINoke) {
-      console.log(`Each Node response :`, chunk);
-    }
-
-    //==========
-    // console.log(`Ai reply :`);
-    // console.log(finalINoke.messages.at(-1)?.content);
-    // console.log(finalINoke);
-  }
-  rl.close();
-}
-main();
+export const agents = graph.compile({ checkpointer: new MemorySaver() });
+//=======================================
