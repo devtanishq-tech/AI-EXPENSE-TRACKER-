@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { agents } from "./agent";
+import type { streamResponse } from "./type";
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -18,11 +19,15 @@ app.get("/chat", (req, res) => {
   }, 1000);
 });
 //-============== this is request where we are sending to the llm /====================
+//=====================================================================================
 app.post("/chat/postrequest", async (req, res) => {
   const bodydata = req.body;
   const query = bodydata?.query;
   res.writeHead(200, {
-    "content-type": "text/event-stream",
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive",
+    "X-Accel-Buffering": "no",
   });
   const finalINoke = await agents.stream(
     {
@@ -41,11 +46,16 @@ app.post("/chat/postrequest", async (req, res) => {
   for await (const [eventype, chunks] of finalINoke) {
     console.log(`EventType:`, eventype);
     console.log(`Chunks:`, chunks[0].content);
-    let messages = {
-      type: "ai",
-      payload: chunks[0].content,
-    };
-    res.write(`end:${eventype}\n`);
+    let messages: streamResponse = {} as streamResponse;
+    if (chunks[0].type === "ai") {
+      messages = {
+        type: "ai",
+        payload: {
+          text: chunks[0].content as string,
+        },
+      };
+    }
+    res.write(`event:${eventype}\n`);
     res.write(`data:${JSON.stringify(messages)}\n\n`);
   }
   res.end();

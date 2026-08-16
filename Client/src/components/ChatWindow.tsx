@@ -1,5 +1,6 @@
 import type { Message } from "../App";
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 type ChatWindowProps = {
   messages: Message[];
 };
@@ -74,7 +75,13 @@ function ChatWindow({ messages }: ChatWindowProps) {
                     : "max-w-[80%] rounded-2xl bg-white/5 px-4 py-3"
                 }
               >
-                {message.content}
+                {message.role === "user" ? (
+                  message.content
+                ) : (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {message.content}
+                  </ReactMarkdown>
+                )}
               </div>
             </div>
           ))}

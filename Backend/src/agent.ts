@@ -23,6 +23,7 @@ const llm = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY,
   model: "openai/gpt-oss-120b",
   temperature: 0,
+  streaming: true,
 });
 //----------------------------------LLM NODE ---------------------
 async function LLMnode(state: typeof MessagesAnnotation.State) {
