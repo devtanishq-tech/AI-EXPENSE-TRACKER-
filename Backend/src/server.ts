@@ -54,6 +54,7 @@ app.post("/chat/postrequest", async (req, res) => {
       messages = chunks as streamResponse;
     }
     if (eventype === "messages") {
+      if (chunks[0].content === "") continue;
       const messageChunk = chunks[0];
       console.log(`Message Content :`, messageChunk.content);
       if (chunks[0].type === "ai") {
@@ -65,16 +66,6 @@ app.post("/chat/postrequest", async (req, res) => {
         };
       }
     }
-
-    // ================tool calling start //=======================
-    // if (chunks[0].type === "tooCall:start") {
-    //   messages = {
-    //     type: "tooCall:start",
-    //     payload:{
-    //       name:
-    //     }
-    //   };
-    // }
     res.write(`event:${eventype}\n`);
     res.write(`data:${JSON.stringify(messages)}\n\n`);
   }
