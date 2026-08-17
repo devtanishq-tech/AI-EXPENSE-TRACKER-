@@ -4,10 +4,17 @@ import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
-export type Message = {
-  role: string;
-  content: string;
-};
+export type Message =
+  | {
+      role: "ai" | "user";
+      content: string;
+    }
+  | {
+      role: "tool";
+      toolname: string;
+      args?: Record<string, any>;
+      result?: Record<string, any>;
+    };
 //============================================
 export type streamResponse =
   | {
@@ -57,11 +64,14 @@ function App() {
       //============================================ this is the updation we do //======================
       onmessage(event) {
         console.log("Event type:", event.event);
+        console.log("Event data Printend", event.data);
         let parseData = JSON.parse(event.data) as streamResponse;
+        //============ai type //==========
         if (parseData.type === "ai") {
           const textt = parseData.payload.text;
           setMessages((prev) => {
             const lastMessage = prev[prev.length - 1];
+
             if (lastMessage?.role === "ai") {
               return [
                 ...prev.slice(0, -1),
@@ -71,6 +81,8 @@ function App() {
                 },
               ];
             }
+            //==================When type is tooCall:start//=========
+
             // nhi to new message  h to
             return [
               ...prev,
@@ -81,6 +93,28 @@ function App() {
             ];
           });
         }
+        if (parseData.type === "tooCall:start") {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "tool",
+              toolname: parseData.payload.name,
+              args: parseData.payload.args,
+            },
+          ]);
+        }
+        // ================= TOOL RESULT =================
+        if (parseData.type === "tool") {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "tool",
+              toolname: parseData.payload.name,
+              result: parseData.payload.result,
+            },
+          ]);
+        }
+        //============data type is
       },
     });
   };

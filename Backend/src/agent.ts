@@ -1,15 +1,20 @@
 import { MemorySaver, MessagesAnnotation } from "@langchain/langgraph";
 import { StateGraph } from "@langchain/langgraph";
+import type { LangGraphRunnableConfig } from "@langchain/langgraph";
+import { getWriter } from "@langchain/langgraph";
 import { ChatGroq } from "@langchain/groq";
 import { initializeDB } from "./import.ts";
 import { databaseFunction } from "./tools.ts";
 import dotenv from "dotenv";
+
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { llmSystemPrompt } from "./prompt.ts";
 import type { AIMessage, ToolMessage } from "@langchain/core/messages";
 import readline from "readline/promises";
 import { waitForDebugger } from "inspector";
 import { ChildProcess } from "child_process";
+import type { streamResponse } from "./type.ts";
+import { write } from "fs";
 dotenv.config();
 console.log(process.env.GROQ_API_KEY);
 // initalize data
@@ -41,9 +46,22 @@ async function LLMnode(state: typeof MessagesAnnotation.State) {
   };
 }
 //==================================GRAPHS ========================
-async function condition1(state: typeof MessagesAnnotation.State) {
+async function condition1(
+  state: typeof MessagesAnnotation.State,
+  config: LangGraphRunnableConfig,
+) {
   const lastmessage = state.messages.at(-1) as AIMessage;
   if (lastmessage.tool_calls?.length) {
+    const toolcall = lastmessage.tool_calls[0];
+    const toolresponse: streamResponse = {
+      type: "tooCall:start",
+      payload: {
+        name: toolcall?.name,
+        args: toolcall?.args,
+      },
+    };
+    const writer = getWriter(config);
+    writer?.(toolresponse);
     return "toolNode";
   }
   return "__end__";

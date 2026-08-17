@@ -39,22 +39,42 @@ app.post("/chat/postrequest", async (req, res) => {
       ],
     },
     {
-      streamMode: ["messages"],
+      streamMode: ["messages", "custom"],
       configurable: { thread_id: "1-1-" },
     },
   );
   for await (const [eventype, chunks] of finalINoke) {
     console.log(`EventType:`, eventype);
-    console.log(`Chunks:`, chunks[0].content);
+    console.log(`Chunks:`, chunks);
     let messages: streamResponse = {} as streamResponse;
-    if (chunks[0].type === "ai") {
-      messages = {
-        type: "ai",
-        payload: {
-          text: chunks[0].content as string,
-        },
-      };
+    if (eventype === "custom") {
+      console.log(`custom event data `);
+      console.log(chunks);
+      console.log(`custom event data `);
+      messages = chunks as streamResponse;
     }
+    if (eventype === "messages") {
+      const messageChunk = chunks[0];
+      console.log(`Message Content :`, messageChunk.content);
+      if (chunks[0].type === "ai") {
+        messages = {
+          type: "ai",
+          payload: {
+            text: messageChunk.content as string,
+          },
+        };
+      }
+    }
+
+    // ================tool calling start //=======================
+    // if (chunks[0].type === "tooCall:start") {
+    //   messages = {
+    //     type: "tooCall:start",
+    //     payload:{
+    //       name:
+    //     }
+    //   };
+    // }
     res.write(`event:${eventype}\n`);
     res.write(`data:${JSON.stringify(messages)}\n\n`);
   }
