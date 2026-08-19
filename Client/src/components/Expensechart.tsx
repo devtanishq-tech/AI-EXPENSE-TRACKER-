@@ -18,7 +18,6 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 type chartData = Record<string, string | number>;
-// it means defining the object and theri key value pair how they looks like
 type ExpenseChartPropes = {
   data: chartData[];
   labelKey: string;

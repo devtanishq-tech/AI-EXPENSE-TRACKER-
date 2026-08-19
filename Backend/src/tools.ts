@@ -1,9 +1,11 @@
 import { tool } from "@langchain/core/tools";
-import { date, success, z } from "zod";
+import { date, string, success, z } from "zod";
 import { initializeDB } from "./import";
 import { Database } from "bun:sqlite";
 import { da } from "zod/locales";
 import { group } from "console";
+import { TavilySearch } from "@langchain/tavily";
+import axios from "axios";
 //============================================//
 export function databaseFunction(Database: Database) {
   const addexpensive = tool(
@@ -128,3 +130,43 @@ Return expense totals grouped by day, week, or month for a date range (YYYY-MM-D
     generateChart,
   };
 }
+export const webSearchtool = new TavilySearch({
+  maxResults: 4,
+  topic: "general",
+});
+async function weather_FNC(city: string) {
+  const response = await axios.get(
+    " http://api.weatherapi.com/v1/current.json",
+    {
+      params: {
+        key: process.env.weather_api,
+        q: city,
+      },
+    },
+  );
+  return JSON.stringify({
+    name: response.data.location.name,
+    country: response.data.location.country,
+    TemperatureinCelsius: response.data.current.temp_c,
+    temperatureINfarenhite: response.data.current.temp_f,
+    humidity: response.data.current.humidity,
+    condition: response.data.current.humidity,
+  });
+}
+export const weatherTool = tool(
+  async ({ city }) => {
+    return await weather_FNC(city);
+  },
+  {
+    name: "weather_Fnc",
+    description:
+      "Get the current weather for a city. Use this only when the user asks about weather, temperature, humidity, or current weather conditions for a specific place.",
+    schema: z.object({
+      city: z
+        .string()
+        .describe(
+          "The city name to get current weather for, such as 'Delhi', 'Mumbai', or 'London'.",
+        ),
+    }),
+  },
+);

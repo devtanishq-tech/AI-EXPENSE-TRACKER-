@@ -4,23 +4,25 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import { getWriter } from "@langchain/langgraph";
 import { ChatGroq } from "@langchain/groq";
 import { initializeDB } from "./import.ts";
-import { databaseFunction } from "./tools.ts";
+import { databaseFunction, weatherTool, webSearchtool } from "./tools.ts";
 import dotenv from "dotenv";
-
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { llmSystemPrompt } from "./prompt.ts";
 import type { AIMessage, ToolMessage } from "@langchain/core/messages";
-import readline from "readline/promises";
-import { waitForDebugger } from "inspector";
-import { ChildProcess } from "child_process";
 import type { streamResponse } from "./type.ts";
-import { write } from "fs";
+
 dotenv.config();
 console.log(process.env.GROQ_API_KEY);
 // initalize data
 const databasee = initializeDB("../expense.db");
 const tool = databaseFunction(databasee);
-const tools = [tool.addexpensive, tool.getExpense, tool.generateChart];
+const tools = [
+  tool.addexpensive,
+  tool.getExpense,
+  tool.generateChart,
+  webSearchtool,
+  weatherTool,
+];
 //========================================================
 const toolNode = new ToolNode(tools);
 //========================================================
@@ -36,6 +38,8 @@ async function LLMnode(state: typeof MessagesAnnotation.State) {
     tool.addexpensive,
     tool.getExpense,
     tool.generateChart,
+    webSearchtool,
+    weatherTool,
   ]);
   const llminvoke = await llmwithTool.invoke([
     llmSystemPrompt,
