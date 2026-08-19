@@ -99,6 +99,7 @@ async function condition2(
   if (messagess.type === "chart") {
     return "__end__";
   }
+  if()
   return "llmNode";
 }
 const graph = new StateGraph(MessagesAnnotation)
