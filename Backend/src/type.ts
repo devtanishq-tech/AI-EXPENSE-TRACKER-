@@ -4,6 +4,12 @@ export type streamResponse =
       payload: { text: string };
     }
   | {
+      type: "tool:status";
+      payload: {
+        text: string;
+      };
+    }
+  | {
       type: "tooCall:start";
       payload: {
         name: string;

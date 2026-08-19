@@ -102,7 +102,9 @@ export function databaseFunction(Database: Database) {
           amount: current.total,
         };
       });
-      console.log(`0--------------------------------`);
+      console.log(`------------------------Result data of GenerateCHart`);
+      console.log(result);
+      console.log(`-------------------------------------------------------`);
 
       return JSON.stringify({ type: `chart`, data: result, labelKey: groupby });
     },

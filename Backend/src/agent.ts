@@ -53,6 +53,18 @@ async function condition1(
   const lastmessage = state.messages.at(-1) as AIMessage;
   if (lastmessage.tool_calls?.length) {
     const toolcall = lastmessage.tool_calls[0];
+    const writer = getWriter(config);
+    //============Send one more cusotom event here //======
+    //================Custom event ----1//===============
+    writer?.({
+      type: "tool:status",
+      payload: {
+        text: `Wait - calling tool ${toolcall!.name}...`,
+      },
+    });
+    //=======================================
+    //==============custom event -2 //==================
+
     const toolresponse: streamResponse = {
       type: "tooCall:start",
       payload: {
@@ -60,16 +72,26 @@ async function condition1(
         args: toolcall?.args,
       },
     };
-    const writer = getWriter(config);
+
     writer?.(toolresponse);
     return "toolNode";
   }
   return "__end__";
 }
-async function condition2(state: typeof MessagesAnnotation.State) {
+async function condition2(
+  state: typeof MessagesAnnotation.State,
+  config: LangGraphRunnableConfig,
+) {
   const lastmessage = state.messages.at(-1) as ToolMessage;
   const messagess = JSON.parse(lastmessage.content as string);
-
+  const writer = getWriter(config);
+  writer?.({
+    type: "tool",
+    payload: {
+      name: lastmessage.name,
+      result: messagess,
+    },
+  });
   if (messagess.type === "chart") {
     return "__end__";
   }

@@ -10,20 +10,23 @@ export type Message =
       content: string;
     }
   | {
-      role: "tool";
+      role: "toolCall";
       toolname: string;
       args?: Record<string, any>;
-      result?: Record<string, any>;
+    }
+  | {
+      role: "toolResult";
+      toolname: string;
+      result?: unknown;
     };
+//----------- ui Type needed to write here //============
 //============================================
 export type streamResponse =
   | {
-      id: string;
       type: "ai";
       payload: { text: string };
     }
   | {
-      id: string;
       type: "tooCall:start";
       payload: {
         name: string;
@@ -31,11 +34,16 @@ export type streamResponse =
       };
     }
   | {
-      id: string;
+      type: "tool:status";
+      payload: {
+        text: string;
+      };
+    }
+  | {
       type: "tool";
       payload: {
         name: string;
-        result: Record<string, any>;
+        result: unknown;
       };
     };
 //================================================
@@ -81,8 +89,6 @@ function App() {
                 },
               ];
             }
-            //==================When type is tooCall:start//=========
-
             // nhi to new message  h to
             return [
               ...prev,
@@ -97,18 +103,27 @@ function App() {
           setMessages((prev) => [
             ...prev,
             {
-              role: "tool",
+              role: "toolCall",
               toolname: parseData.payload.name,
               args: parseData.payload.args,
             },
           ]);
         }
-        // ================= TOOL RESULT =================
-        if (parseData.type === "tool") {
+        if (parseData.type === "tool:status") {
           setMessages((prev) => [
             ...prev,
             {
-              role: "tool",
+              role: "ai",
+              content: parseData.payload.text,
+            },
+          ]);
+        }
+        if (parseData.type === "tool") {
+          // ================= TOOL RESULT =================
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "toolResult",
               toolname: parseData.payload.name,
               result: parseData.payload.result,
             },

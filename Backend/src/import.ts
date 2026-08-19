@@ -1,8 +1,14 @@
+// import.ts
 import { Database } from "bun:sqlite";
+import path from "path";
 
 export function initializeDB(filePath: string): Database {
-  const database = new Database(filePath);
-  // below we are defining the schema of the  database
+  const resolvedPath = path.isAbsolute(filePath)
+    ? filePath
+    : path.join(import.meta.dir, filePath); // import.meta.dir = folder containing import.ts, always
+
+  const database = new Database(resolvedPath);
+
   const query = `
     CREATE TABLE IF NOT EXISTS expense (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -11,7 +17,6 @@ export function initializeDB(filePath: string): Database {
       date TEXT NOT NULL
     )
   `;
-
   database.exec(query);
 
   return database;
