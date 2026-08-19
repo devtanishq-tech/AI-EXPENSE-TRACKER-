@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Message } from "../App";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -10,7 +10,12 @@ type ChatWindowProps = {
 
 function ChatWindow({ messages }: ChatWindowProps) {
   const [openToolIndex, setOpenToolIndex] = useState<number | null>(null);
-
+  const messageScrool = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    messageScrool.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [messages]);
   return (
     <div className="flex-1 overflow-y-auto">
       {messages.length === 0 ? (
@@ -187,6 +192,7 @@ function ChatWindow({ messages }: ChatWindowProps) {
               )}
             </div>
           ))}
+          <div ref={messageScrool} />
         </div>
       )}
     </div>
