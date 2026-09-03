@@ -48,6 +48,7 @@ export type streamResponse =
 //================================================
 
 function App() {
+  const BACKEND_URL = "https://ai-expense-tracker-yz02.onrender.com";
   const [messages, setMessages] = useState<Message[]>([]);
   const handleSendMessage = async (message: string) => {
     // Add user's message to UI
@@ -60,7 +61,7 @@ function App() {
     ]);
 
     // Send message to backend
-    await fetchEventSource("http://localhost:8080/chat/postrequest", {
+    await fetchEventSource(`${BACKEND_URL}/chat/postrequest`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
