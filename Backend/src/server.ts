@@ -5,7 +5,7 @@ import type { streamResponse } from "./type";
 const app = express();
 app.use(express.json());
 app.use(cors());
-const port = 8080;
+const port = process.env.PORT;
 app.get("/", (req, res) => {
   res.json("Hi there ");
 });
