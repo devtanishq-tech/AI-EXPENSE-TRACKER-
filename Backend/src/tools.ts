@@ -145,7 +145,6 @@ async function weather_FNC(city: string) {
     },
   );
   return JSON.stringify({
-    type: "weatherChart",
     name: response.data.location.name,
     country: response.data.location.country,
     TemperatureinCelsius: response.data.current.temp_c,

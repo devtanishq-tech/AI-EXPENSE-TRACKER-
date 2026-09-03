@@ -72,8 +72,8 @@ async function condition1(
     const toolresponse: streamResponse = {
       type: "tooCall:start",
       payload: {
-        name: toolcall?.name,
-        args: toolcall?.args,
+        name: toolcall?.name!,
+        args: toolcall?.args!,
       },
     };
 
@@ -99,7 +99,6 @@ async function condition2(
   if (messagess.type === "chart") {
     return "__end__";
   }
-  if()
   return "llmNode";
 }
 const graph = new StateGraph(MessagesAnnotation)
