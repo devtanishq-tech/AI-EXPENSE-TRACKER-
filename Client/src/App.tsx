@@ -3,7 +3,6 @@ import Navbar from "./components/Navbar";
 import ChatWindow from "./components/ChatWindow";
 import ChatInput from "./components/ChatInput";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
-
 export type Message =
   | {
       role: "ai" | "user";
@@ -17,7 +16,7 @@ export type Message =
   | {
       role: "toolResult";
       toolname: string;
-      result?: unknown;
+      result?: any;
     };
 //----------- ui Type needed to write here //============
 //============================================

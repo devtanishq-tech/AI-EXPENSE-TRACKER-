@@ -160,6 +160,7 @@ function ChatWindow({ messages }: ChatWindowProps) {
                     </div>
                     <br></br>
                     <br></br>
+
                     {message.toolname === "generateChart" && (
                       <div className="mb-4">
                         <Expensechart
