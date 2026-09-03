@@ -1,17 +1,19 @@
 import { tool } from "@langchain/core/tools";
-import { date, string, success, z } from "zod";
-import { initializeDB } from "./import";
+import { success, z } from "zod";
 import { Database } from "bun:sqlite";
-import { da } from "zod/locales";
-import { group } from "console";
 import { TavilySearch } from "@langchain/tavily";
 import axios from "axios";
 //============================================//
+
+type ChartRow = {
+  period: string;
+  total: number;
+};
 export function databaseFunction(Database: Database) {
   const addexpensive = tool(
     async ({ title, amount }) => {
       // inside the add expensive tool , we need to sql lite database , to insert some value
-      const date = new Date().toISOString().split("T")[0];
+      const date = new Date().toISOString().split("T")[0]!;
       console.log(date);
       const query = Database.prepare(
         `INSERT INTO expense (title,amount,date) VALUES (?,?,?)`,
@@ -91,7 +93,7 @@ export function databaseFunction(Database: Database) {
         GROUP BY period
         ORDER BY period`,
       );
-      const rows = query.all(from, to);
+      const rows = query.all(from, to) as ChartRow[];
       console.log(`--------------------------------`);
       console.log(`Row is printed below `);
 

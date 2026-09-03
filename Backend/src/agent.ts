@@ -12,7 +12,6 @@ import type { AIMessage, ToolMessage } from "@langchain/core/messages";
 import type { streamResponse } from "./type.ts";
 
 dotenv.config();
-console.log(process.env.GROQ_API_KEY);
 // initalize data
 const databasee = initializeDB("../expense.db");
 const tool = databaseFunction(databasee);
